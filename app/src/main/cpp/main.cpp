@@ -7,7 +7,7 @@
 class MySettings
 {
     // fields
-    public: constexpr static const float TURN_TIMES_IN_SECONDS = 0.02f;// = 0.02f; //1.0f / 50.0f; // 50 times per second
+    public: constexpr static const float TURN_TIMES_IN_SECONDS = 0.02f; // 50 times per second
     public: bool m_IsPause = false;
     public: bool m_IsGraphicInited = false;
     public: MyGame MyGame;
@@ -17,8 +17,7 @@ class MySettings
     private: struct timespec _lastTime;
 
     // constructor
-public:
-    MySettings(AAssetManager* pAssetManager) : MyGame(pAssetManager)
+    public: MySettings(AAssetManager* pAssetManager) : MyGame(pAssetManager)
     {
         _currentTime.tv_sec = 0;
         _currentTime.tv_nsec = 0;
@@ -32,7 +31,7 @@ public:
         _currentTime.tv_sec = _currentTime.tv_nsec = 0;
         clock_gettime(CLOCK_MONOTONIC, &_currentTime);
 
-        // il ellapsed time
+        // is ellapsed time
         if ( ((_currentTime.tv_sec - _lastTime.tv_sec) + (_currentTime.tv_nsec - _lastTime.tv_nsec) / 1000000000.f) >= TURN_TIMES_IN_SECONDS )
         {
             // set last time

@@ -29,16 +29,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -Wall -Werror")
 set(CMAKE_SHARED_LINKER_FLAGS
     "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 
-add_library(MyNativeActivity1
+add_library(MyCPlusPlusActivity
         SHARED
         main.cpp
         my_game.cpp)
 
-target_include_directories(MyNativeActivity1 PRIVATE
+target_include_directories(MyCPlusPlusActivity PRIVATE
     ${ANDROID_NDK}/sources/android/native_app_glue)
 
 # add lib dependencies
-target_link_libraries(MyNativeActivity1
+target_link_libraries(MyCPlusPlusActivity
     android
     native_app_glue
     EGL

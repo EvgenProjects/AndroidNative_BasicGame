@@ -65,18 +65,21 @@ void engine_handle_cmd(struct android_app* app, int32_t cmd)
 			break;
 
 		case APP_CMD_INIT_WINDOW:
-			if (app->window != nullptr)
+			if (pMySettings->m_IsGraphicInited)
 			{
-				if (!pMySettings->m_IsGraphicInited)
-					pMySettings->m_IsGraphicInited = pMySettings->MyGame.InitGraphic_OpenGL(app->window);
+				pMySettings->MyGame.InitSurface_OpenGL(app->window);
+				pMySettings->MyGame.MakeCurrent_Display_Surface_Context_OpenGL();
+			}
+			else
+			{
+				pMySettings->m_IsGraphicInited = pMySettings->MyGame.InitGraphic_OpenGL(app->window);
 			}
 			break;
 
 		case APP_CMD_TERM_WINDOW:
 			{
 				// The window is being hidden or closed, clean it up.
-				pMySettings->MyGame.CloseGraphic_OpenGL();
-				pMySettings->m_IsGraphicInited = false;
+				pMySettings->MyGame.KillSurface_OpenGL();
 				break;
 			}
 

@@ -40,7 +40,7 @@ void MyGame::DrawGraphic_OpenGL()
 	eglSwapBuffers(m_Display, m_Surface);
 }
 
-void MyGame::InitSurface_OpenGL(ANativeWindow* pWindow)
+void MyGame::CreateSurfaceFromWindow_OpenGL(ANativeWindow* pWindow)
 {
 	const EGLint attribs[] = {EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
 							  EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
@@ -82,7 +82,7 @@ bool MyGame::InitGraphic_OpenGL(ANativeWindow* pWindow)
 	eglInitialize(m_Display, nullptr, nullptr);
 
 	// init Surface
-	InitSurface_OpenGL(pWindow);
+	CreateSurfaceFromWindow_OpenGL(pWindow);
 
 	// init Context
 	EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2,EGL_NONE };

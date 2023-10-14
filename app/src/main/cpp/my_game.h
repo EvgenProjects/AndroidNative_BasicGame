@@ -23,7 +23,7 @@ class MyGame
     public: void OnNextTick();
 
     // OpenGL
-    public: void InitSurface_OpenGL(ANativeWindow* pWindow); // calling when window set focus (need recreate Surface OpenGL)
+    public: void CreateSurfaceFromWindow_OpenGL(ANativeWindow* pWindow); // calling when window set focus (need recreate Surface OpenGL)
     public: void KillSurface_OpenGL(); // calling when window kill focus (need destroy Surface OpenGL)
     public: bool MakeCurrent_Display_Surface_Context_OpenGL();
     public: bool InitGraphic_OpenGL(ANativeWindow* pWindow);

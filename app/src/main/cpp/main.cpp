@@ -67,7 +67,7 @@ void engine_handle_cmd(struct android_app* app, int32_t cmd)
 		case APP_CMD_INIT_WINDOW:
 			if (pMySettings->m_IsGraphicInited)
 			{
-				pMySettings->MyGame.InitSurface_OpenGL(app->window);
+				pMySettings->MyGame.CreateSurfaceFromWindow_OpenGL(app->window);
 				pMySettings->MyGame.MakeCurrent_Display_Surface_Context_OpenGL();
 			}
 			else

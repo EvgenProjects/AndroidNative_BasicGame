@@ -5,9 +5,9 @@
 
 MyGame::MyGame(AAssetManager* pAssetManager)
 {
-	m_Width = 0;
-	m_Height = 0;
 	m_pAssetManager = pAssetManager;
+    m_isButtonPressed = false;
+    m_moveStep = 0;
 }
 
 void MyGame::OnActiveFocus()
@@ -20,114 +20,206 @@ void MyGame::OnLostFocus()
 
 bool MyGame::OnHandleTouch(AInputEvent* pEvent)
 {
+    if (m_Graphic.GetWidth()>0 && m_Graphic.GetHeight()>0 && AInputEvent_getType(pEvent) == AINPUT_EVENT_TYPE_MOTION) {
+
+        if ((AMOTION_EVENT_ACTION_MASK & AMotionEvent_getAction(pEvent)) == AMOTION_EVENT_ACTION_DOWN)
+        {
+            m_isButtonPressed = true;
+            m_ptWhenTouched = XY(
+                    (float)AMotionEvent_getX(pEvent, 0) / (float)m_Graphic.GetWidth(), // normalize to [0, 1]
+                    (float)AMotionEvent_getY(pEvent, 0) / (float)m_Graphic.GetHeight() // normalize to [0, 1]
+            );
+            return true;
+        }
+        else if ((AMOTION_EVENT_ACTION_MASK & AMotionEvent_getAction(pEvent)) == AMOTION_EVENT_ACTION_UP)
+        {
+            m_isButtonPressed = false;
+        }
+        return true;
+    }
 	return false; // event not handled
 }
 
 void MyGame::OnNextTick()
 {
+    m_Lakes.MoveByOffset(0, -m_moveStep);
+
+    m_EnemyAirPlane.MoveByOffset(0, -m_moveStep*1.5);
+
+    if (m_isButtonPressed)
+    {
+        if (m_ptWhenTouched.x < 0.5)
+            m_AirPlane.MoveByOffset(-m_moveStep, 0);
+        else
+            m_AirPlane.MoveByOffset(m_moveStep, 0);
+    }
 }
 
-// open GL
-void MyGame::DrawGraphic_OpenGL()
+void MyGame::OnDraw()
 {
-	if (m_Display == EGL_NO_DISPLAY || m_Surface == EGL_NO_SURFACE || m_Context == EGL_NO_CONTEXT)
-		return;
+    m_Graphic.DrawBackground(0.72f, 0.87f, 0.55f, 1);
 
-	// green color
-	glClearColor(0.72f, 0.87f, 0.55f, 1);
-	glClear(GL_COLOR_BUFFER_BIT);
+    m_EnemyAirPlane.Draw();
+    m_AirPlane.Draw();
+    m_Lakes.Draw();
 
-	eglSwapBuffers(m_Display, m_Surface);
+    m_Graphic.DrawGraphicEnd();
 }
 
-void MyGame::CreateSurfaceFromWindow_OpenGL(ANativeWindow* pWindow)
+void MyGame::OnKillWindow()
 {
-	const EGLint attribs[] = {EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-							  EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-							  EGL_BLUE_SIZE, 8,
-							  EGL_GREEN_SIZE, 8,
-							  EGL_RED_SIZE, 8,
-							  EGL_NONE};
-	EGLint format;
-	EGLint numConfigs;
-
-	eglChooseConfig(m_Display, attribs, &m_configOpenGL, 1, &numConfigs);
-
-	eglGetConfigAttrib(m_Display, m_configOpenGL, EGL_NATIVE_VISUAL_ID, &format);
-
-	m_Surface = eglCreateWindowSurface(m_Display, m_configOpenGL, pWindow, NULL);
+    m_Graphic.CloseGraphic();
 }
 
-void MyGame::KillSurface_OpenGL()
+void MyGame::OnCreateWindow(ANativeWindow *pWindow)
 {
-	eglMakeCurrent(m_Display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-	if (m_Surface != EGL_NO_SURFACE)
-	{
-		eglDestroySurface(m_Display, m_Surface);
-		m_Surface = EGL_NO_SURFACE;
-	}
+    m_Graphic.InitGraphic(pWindow);
+
+    m_moveStep = 0.008;
+
+    CreateEnemyAirPlane(0.2, -1.7);
+    CreateEnemyAirPlane(0.5, -1.2);
+    CreateEnemyAirPlane(0.3, -3.7);
+
+    CreateMyAirPlane(0.5, 0.8);
+
+    CreateLake(0.4, -0.3, 0.5, 0.4);
+    CreateLake(0.1, -2.1, 0.7, 0.5);
+    CreateLake(0.5, -4, 0.5, 0.7);
+    CreateLake(0.4, -7, 0.7, 0.5);
 }
 
-bool MyGame::MakeCurrent_Display_Surface_Context_OpenGL()
+void MyGame::CreateLake(float xCenter, float yCenter, float width, float height)
 {
-	if (eglMakeCurrent(m_Display, m_Surface, m_Surface, m_Context) == EGL_FALSE)
-		return false;
-	return true;
+    My2DPrimitive primitive2D;
+
+    RGBA colorBlue = {0.0f, 0.0f, 1.0f, 1.0f};
+    RGBA colorLightBlue = {0.3f, 0.3f, 0.5f, 1.0f};
+
+    // lake
+    primitive2D.RemoveAll();
+    primitive2D.Add(xCenter - width / 2.f, yCenter - height / 2.f, colorBlue);
+    primitive2D.Add(xCenter + width / 2.f, yCenter - height / 2.f, colorLightBlue);
+    primitive2D.Add(xCenter - width / 2.f, yCenter + height / 2.f, colorLightBlue);
+    primitive2D.Add(xCenter + width / 2.f, yCenter + height / 2.f, colorLightBlue);
+    primitive2D.SetMode(GL_TRIANGLE_STRIP);
+    m_Lakes.Add2DPrimitive(primitive2D);
 }
 
-bool MyGame::InitGraphic_OpenGL(ANativeWindow* pWindow)
+void MyGame::CreateMyAirPlane(float xCenter, float yCenter)
 {
-	// init Display
-	m_Display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-	eglInitialize(m_Display, nullptr, nullptr);
+    My2DPrimitive primitive2D;
 
-	// init Surface
-	CreateSurfaceFromWindow_OpenGL(pWindow);
+    float wingW = 0.3;
+    float wingH = 0.02;
+    float wingA = 0.01;
 
-	// init Context
-	EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2,EGL_NONE };
-	m_Context = eglCreateContext(m_Display, m_configOpenGL, NULL, contextAttribs);
+    float backWingW = 0.10;
+    float backWingH = 0.018;
+    float backWingHOffset = 0.066;
 
-	if (!MakeCurrent_Display_Surface_Context_OpenGL())
-		return false;
+    float bodyW1 = 0.054;
+    float bodyW2 = 0.03;
+    float bodyH = 0.12;
+    float bodyHOffset = 0.02;
+    float bodyHeadRadius = 0.01;
 
-	EGLint w, h;
-	eglQuerySurface(m_Display, m_Surface, EGL_WIDTH, &w);
-	eglQuerySurface(m_Display, m_Surface, EGL_HEIGHT, &h);
+    RGBA color1 = {0.9f, 0.9f, 0.9f, 1.0f};
+    RGBA color2 = {0.3f, 0.3f, 0.3f, 0.6f};
 
-	m_Width = w;
-	m_Height = h;
+    // body
+    primitive2D.RemoveAll();
+    primitive2D.Add(xCenter + bodyW2 / 2.f,    yCenter + bodyH / 2.f+bodyHOffset, color1);
+    primitive2D.Add(xCenter - bodyW2 / 2.f,    yCenter + bodyH / 2.f+bodyHOffset, color1);
+    primitive2D.Add(xCenter + bodyW1 / 2.f,    yCenter - bodyH / 2.f+bodyHOffset, color2);
+    primitive2D.Add(xCenter - bodyW1 / 2.f,    yCenter - bodyH / 2.f+bodyHOffset, color2);
+    primitive2D.Add(xCenter,                   yCenter - bodyH / 2.f+bodyHOffset-(bodyHeadRadius), color2);
+    primitive2D.SetMode(GL_TRIANGLE_STRIP);
+    m_AirPlane.Add2DPrimitive(primitive2D);
 
-	// Open GL states
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_TEXTURE_2D);
+    // left wing
+    primitive2D.RemoveAll();
+    primitive2D.Add(xCenter - wingW / 2.f, yCenter - wingH / 2.f, color2);
+    primitive2D.Add(xCenter + 0,           yCenter - wingH / 2.f, color2);
+    primitive2D.Add(xCenter - wingW / 2.f, yCenter + wingH / 2.f, color1);
+    primitive2D.Add(xCenter + 0,           yCenter + wingH / 2.f + wingA, color1);
+    primitive2D.SetMode(GL_TRIANGLE_STRIP);
+    m_AirPlane.Add2DPrimitive(primitive2D);
 
-	// for alpha color (transparency)
-	glEnable( GL_BLEND );
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // right wing
+    primitive2D.RemoveAll();
+    primitive2D.Add(xCenter + wingW / 2.f, yCenter - wingH / 2.f, color2);
+    primitive2D.Add(xCenter + 0,           yCenter - wingH / 2.f, color2);
+    primitive2D.Add(xCenter + wingW / 2.f, yCenter + wingH / 2.f, color1);
+    primitive2D.Add(xCenter + 0,           yCenter + wingH / 2.f + wingA, color1);
+    primitive2D.SetMode(GL_TRIANGLE_STRIP);
+    m_AirPlane.Add2DPrimitive(primitive2D);
 
-	return true;
+    // back wing
+    primitive2D.RemoveAll();
+    primitive2D.Add(xCenter - backWingW / 2.f, yCenter - backWingH / 2.f + backWingHOffset, color2);
+    primitive2D.Add(xCenter + backWingW / 2.f, yCenter - backWingH / 2.f + backWingHOffset, color2);
+    primitive2D.Add(xCenter - backWingW / 2.f, yCenter + backWingH / 2.f + backWingHOffset, color1);
+    primitive2D.Add(xCenter + backWingW / 2.f, yCenter + backWingH / 2.f + backWingHOffset, color1);
+    primitive2D.SetMode(GL_TRIANGLE_STRIP);
+    m_AirPlane.Add2DPrimitive(primitive2D);
 }
 
-void MyGame::CloseGraphic_OpenGL()
+void MyGame::CreateEnemyAirPlane(float xCenter, float yCenter)
 {
-	if (m_Display != EGL_NO_DISPLAY)
-	{
-		eglMakeCurrent(m_Display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    My2DPrimitive primitive2D;
 
-		if (m_Context != EGL_NO_CONTEXT) {
-			eglDestroyContext(m_Display, m_Context);
-		}
+    float wingW = 0.25;
+    float wingH = 0.015;
+    float wingA = 0.0075;
 
-		if (m_Surface != EGL_NO_SURFACE) {
-			eglDestroySurface(m_Display, m_Surface);
-		}
+    float backWingW = 0.075;
+    float backWingH = 0.0135;
+    float backWingHOffset = 0.054;
 
-		eglTerminate(m_Display);
-	}
+    float bodyW1 = 0.033;
+    float bodyW2 = 0.025;
+    float bodyH = 0.09;
+    float bodyHOffset = 0.015;
+    float bodyHeadRadius = 0.0075;
 
-	m_Display = EGL_NO_DISPLAY;
-	m_Context = EGL_NO_CONTEXT;
-	m_Surface = EGL_NO_SURFACE;
+    RGBA color1 = {0.9f, 0.2f, 0.4f, 1.0f};
+    RGBA color2 = {0.5f, 0.2f, 0.1f, 0.6f};
+
+    // body
+    primitive2D.RemoveAll();
+    primitive2D.Add(xCenter + bodyW2 / 2.f,    yCenter - bodyH / 2.f-bodyHOffset, color1);
+    primitive2D.Add(xCenter - bodyW2 / 2.f,    yCenter - bodyH / 2.f-bodyHOffset, color1);
+    primitive2D.Add(xCenter + bodyW1 / 2.f,    yCenter + bodyH / 2.f-bodyHOffset, color2);
+    primitive2D.Add(xCenter - bodyW1 / 2.f,    yCenter + bodyH / 2.f-bodyHOffset, color2);
+    primitive2D.Add(xCenter,                   yCenter + bodyH / 2.f-bodyHOffset+(bodyHeadRadius), color2);
+    primitive2D.SetMode(GL_TRIANGLE_STRIP);
+    m_EnemyAirPlane.Add2DPrimitive(primitive2D);
+
+    // left wing
+    primitive2D.RemoveAll();
+    primitive2D.Add(xCenter - wingW / 2.f, yCenter + wingH / 2.f, color2);
+    primitive2D.Add(xCenter + 0,           yCenter + wingH / 2.f, color2);
+    primitive2D.Add(xCenter - wingW / 2.f, yCenter - wingH / 2.f, color1);
+    primitive2D.Add(xCenter + 0,           yCenter - wingH / 2.f - wingA, color1);
+    primitive2D.SetMode(GL_TRIANGLE_STRIP);
+    m_EnemyAirPlane.Add2DPrimitive(primitive2D);
+
+    // right wing
+    primitive2D.RemoveAll();
+    primitive2D.Add(xCenter + wingW / 2.f, yCenter + wingH / 2.f, color2);
+    primitive2D.Add(xCenter + 0,           yCenter + wingH / 2.f, color2);
+    primitive2D.Add(xCenter + wingW / 2.f, yCenter - wingH / 2.f, color1);
+    primitive2D.Add(xCenter + 0,           yCenter - wingH / 2.f - wingA, color1);
+    primitive2D.SetMode(GL_TRIANGLE_STRIP);
+    m_EnemyAirPlane.Add2DPrimitive(primitive2D);
+
+    // back wing
+    primitive2D.RemoveAll();
+    primitive2D.Add(xCenter - backWingW / 2.f, yCenter + backWingH / 2.f - backWingHOffset, color2);
+    primitive2D.Add(xCenter + backWingW / 2.f, yCenter + backWingH / 2.f - backWingHOffset, color2);
+    primitive2D.Add(xCenter - backWingW / 2.f, yCenter - backWingH / 2.f - backWingHOffset, color1);
+    primitive2D.Add(xCenter + backWingW / 2.f, yCenter - backWingH / 2.f - backWingHOffset, color1);
+    primitive2D.SetMode(GL_TRIANGLE_STRIP);
+    m_EnemyAirPlane.Add2DPrimitive(primitive2D);
 }

@@ -10,7 +10,6 @@ class MySettings
 	// fields
 	public: constexpr static const float TURN_TIMES_IN_SECONDS = 0.02f; // 50 times per second
 	public: bool m_IsPause = false;
-	public: bool m_IsGraphicInited = false;
 	public: MyGame MyGame;
 
 	// local variables
@@ -65,23 +64,12 @@ void engine_handle_cmd(struct android_app* app, int32_t cmd)
 			break;
 
 		case APP_CMD_INIT_WINDOW:
-			if (pMySettings->m_IsGraphicInited)
-			{
-				pMySettings->MyGame.CreateSurfaceFromWindow_OpenGL(app->window);
-				pMySettings->MyGame.MakeCurrent_Display_Surface_Context_OpenGL();
-			}
-			else
-			{
-				pMySettings->m_IsGraphicInited = pMySettings->MyGame.InitGraphic_OpenGL(app->window);
-			}
+    		pMySettings->MyGame.OnCreateWindow(app->window);
 			break;
 
 		case APP_CMD_TERM_WINDOW:
-			{
-				// The window is being hidden or closed, clean it up.
-				pMySettings->MyGame.KillSurface_OpenGL();
-				break;
-			}
+			pMySettings->MyGame.OnKillWindow();
+			break;
 
 		case APP_CMD_GAINED_FOCUS:
 		{
@@ -134,15 +122,15 @@ void android_main(struct android_app* pAndroidApp)
 			// stop application
 			if (pAndroidApp->destroyRequested != 0)
 			{
-				mySettings.MyGame.CloseGraphic_OpenGL();
+				mySettings.MyGame.OnKillWindow();
 				return;
 			}
 		}
 
-		if (!mySettings.m_IsPause && mySettings.m_IsGraphicInited)
+		if (!mySettings.m_IsPause)
 		{
 			// draw scene
-			mySettings.MyGame.DrawGraphic_OpenGL();
+			mySettings.MyGame.OnDraw();
 
 			 // next tick
 			if (mySettings.IsNextGameTick())

@@ -1,6 +1,7 @@
 #include <android/input.h>
 #include <android/asset_manager.h>
 #include <EGL/egl.h>
+#include "graphic.h"
 
 class MyGame
 {
@@ -9,25 +10,26 @@ class MyGame
 
     // fields
     protected: AAssetManager* m_pAssetManager;
-    protected: EGLDisplay m_Display = EGL_NO_DISPLAY;
-    protected: EGLSurface m_Surface = EGL_NO_SURFACE;
-    protected: EGLContext m_Context = EGL_NO_CONTEXT;
-    protected: EGLConfig m_configOpenGL = nullptr;
-    protected: int32_t m_Width;
-    protected: int32_t m_Height;
+    protected: Graphic m_Graphic;
+    protected: bool m_isButtonPressed;
+    protected: XY m_ptWhenTouched;
+    protected: float m_moveStep;
+
+    // my game
+    public: void CreateMyAirPlane(float xCenter, float yCenter);
+    public: void CreateEnemyAirPlane(float xCenter, float yCenter);
+    public: void CreateLake(float xCenter, float yCenter, float width, float height);
+    protected: My2DObject m_AirPlane;
+    protected: My2DObject m_Lakes;
+    protected: My2DObject m_EnemyAirPlane;
 
     // events
     public: void OnActiveFocus();
     public: void OnLostFocus();
     public: bool OnHandleTouch(AInputEvent* pEvent);
     public: void OnNextTick();
-
-    // OpenGL
-    public: void CreateSurfaceFromWindow_OpenGL(ANativeWindow* pWindow); // calling when window set focus (need recreate Surface OpenGL)
-    public: void KillSurface_OpenGL(); // calling when window kill focus (need destroy Surface OpenGL)
-    public: bool MakeCurrent_Display_Surface_Context_OpenGL();
-    public: bool InitGraphic_OpenGL(ANativeWindow* pWindow);
-    public: void CloseGraphic_OpenGL();
-    public: void DrawGraphic_OpenGL();
+    public: void OnCreateWindow(ANativeWindow* pWindow);
+    public: void OnKillWindow();
+    public: void OnDraw();
 };
 

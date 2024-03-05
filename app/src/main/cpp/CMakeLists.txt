@@ -32,6 +32,7 @@ set(CMAKE_SHARED_LINKER_FLAGS
 add_library(MyCPlusPlusActivity
         SHARED
         main.cpp
+        graphic.cpp
         my_game.cpp)
 
 target_include_directories(MyCPlusPlusActivity PRIVATE
@@ -42,5 +43,5 @@ target_link_libraries(MyCPlusPlusActivity
     android
     native_app_glue
     EGL
-    GLESv2
+    GLESv1_CM
     log)

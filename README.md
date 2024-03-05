@@ -22,7 +22,9 @@ You will see result:
  it was first 
 ![image](https://github.com/EvgenProjects/AndroidNative_BasicGame/assets/38002631/1cf96e17-2848-4375-b45a-ec7d93680ed3)
 
+
 I added graphic.cpp file for drawing figures with color
+
 And created game with airplane, lakes, enemy airplanes:
 ![image](https://github.com/EvgenProjects/AndroidNative_BasicGame/assets/38002631/652f2215-7abf-4651-9eb1-e3c81112fcc9)
 

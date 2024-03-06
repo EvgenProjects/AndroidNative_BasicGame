@@ -83,26 +83,57 @@ void MyGame::OnCreateWindow(ANativeWindow *pWindow)
 
     CreateMyAirPlane(0.5, 0.8);
 
-    CreateLake(0.4, -0.3, 0.5, 0.4);
-    CreateLake(0.1, -2.1, 0.7, 0.5);
-    CreateLake(0.5, -4, 0.5, 0.7);
-    CreateLake(0.4, -7, 0.7, 0.5);
+    CreateLake(0.4, -1.3, 0.5, 0.7);
+    //CreateLake(0.1, -1.8, 0.7, 1.3);
+   // CreateLake(0.5, -4, 0.5, 0.7);
+    //CreateLake(0.4, -7, 0.7, 0.5);
+}
+
+XY ConvertPoint(float sourceWidth, float sourceHeight, XY sourcePoint, float xCenter, float yCenter, float width, float height)
+{
+    return XY (
+            xCenter + width * sourcePoint.x / sourceWidth,
+            yCenter + height * sourcePoint.y / sourceHeight
+    );
 }
 
 void MyGame::CreateLake(float xCenter, float yCenter, float width, float height)
 {
     My2DPrimitive primitive2D;
 
-    RGBA colorBlue = {0.0f, 0.0f, 1.0f, 1.0f};
-    RGBA colorLightBlue = {0.3f, 0.3f, 0.5f, 1.0f};
+    RGBA colorBlue = {0.0f, 0.0f, 0.7f, 0.8f};
+    RGBA colorLightBlue = {0.0f, 0.0f, 0.5f, 0.7f};
 
     // lake
     primitive2D.RemoveAll();
-    primitive2D.Add(xCenter - width / 2.f, yCenter - height / 2.f, colorBlue);
-    primitive2D.Add(xCenter + width / 2.f, yCenter - height / 2.f, colorLightBlue);
-    primitive2D.Add(xCenter - width / 2.f, yCenter + height / 2.f, colorLightBlue);
-    primitive2D.Add(xCenter + width / 2.f, yCenter + height / 2.f, colorLightBlue);
-    primitive2D.SetMode(GL_TRIANGLE_STRIP);
+
+    float sourceWidth = 100; // in pixels
+    float sourceHeight = 100; // in pixels
+    XY sourcePoints[] = {
+    XY(50,50), // center point
+    XY(43,0), // first point
+    XY(68,2),
+    XY(85,10),
+    XY(94,23),
+    XY(100,36),
+    XY(100,64),
+    XY(84,88),
+    XY(59,100),
+    XY(41,100),
+    XY(19,94),
+    XY(4,75),
+    XY(1,50),
+    XY(5,27),
+    XY(14,10),
+    XY(43,0), // same first point
+    };
+
+    primitive2D.SetMode(GL_TRIANGLE_FAN);
+    for (int i=0; i<sizeof(sourcePoints)/sizeof(sourcePoints[0]); i++)
+    {
+        XY pt = ConvertPoint(sourceWidth, sourceHeight, sourcePoints[i], xCenter, yCenter, width, height);
+        primitive2D.Add(pt.x, pt.y, i==0 ? colorLightBlue : colorBlue);
+    }
     m_Lakes.Add2DPrimitive(primitive2D);
 }
 

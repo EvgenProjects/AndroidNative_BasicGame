@@ -199,7 +199,6 @@ void MyObject::CreateByTemplate(const MyObject& objTemplate, XY realPos, float r
 			if (rItem.position.x>maxY)
 				maxY = rItem.position.y;
 		}
-		m_arrPolygon.push_back(myPolygon);
 	}
 	float imgWidth = maxX-minX;
 	if (imgWidth<=0)

@@ -49,7 +49,14 @@ class MySettings
 int32_t engine_handle_input(struct android_app* app, AInputEvent* pEvent)
 {
 	MySettings* pMySettings = (MySettings*)app->userData;
-	return pMySettings->MyGame.OnHandleTouch(pEvent);
+
+	bool isMotion = AInputEvent_getType(pEvent) == AINPUT_EVENT_TYPE_MOTION;
+	bool isTouchDown = (AMOTION_EVENT_ACTION_MASK & AMotionEvent_getAction(pEvent)) == AMOTION_EVENT_ACTION_DOWN;
+	bool isTouchUp = (AMOTION_EVENT_ACTION_MASK & AMotionEvent_getAction(pEvent)) == AMOTION_EVENT_ACTION_UP;
+	float xDevicePixel = AMotionEvent_getX(pEvent, 0);
+	float yDevicePixel = AMotionEvent_getY(pEvent, 0);
+
+	return pMySettings->MyGame.OnHandleTouch(pEvent, isMotion, isTouchDown, isTouchUp, xDevicePixel, yDevicePixel);
 }
 
 /**

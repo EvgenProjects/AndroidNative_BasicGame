@@ -16,6 +16,7 @@ struct XYZ
     GLfloat x;
     GLfloat y;
     GLfloat z;
+    XYZ(float x=0, float y=0, float z=0) { this->x=x; this->y=y; this->z=z;}
 };
 
 struct XY
@@ -25,10 +26,19 @@ struct XY
     XY(float x=0, float y=0) { this->x=x; this->y=y; }
 };
 
-class Graphic
+
+struct XYZ_RGBA
+{
+    XYZ position;
+    RGBA color;
+    XYZ_RGBA(XY pos, RGBA color, GLfloat z=0) { this->position.x=pos.x; this->position.y=pos.y; this->position.z=z; this->color=color; }
+    XYZ_RGBA(XYZ position, RGBA color) { this->position=position; this->color=color; }
+};
+
+class MyGraphic
 {
     // constructor
-    public: Graphic();
+    public: MyGraphic();
 
     // fields
     protected: AAssetManager* m_pAssetManager;
@@ -52,27 +62,29 @@ class Graphic
     int GetHeight(){ return m_Height; }
 };
 
-class My2DPrimitive
+class MyPolygon
 {
-    public: void SetMode(int drawMode);
-    public: void Add(float x, float y, RGBA color);
-    public: void RemoveAll();
+    public: MyPolygon();
+    public: MyPolygon(int drawMode, std::vector<XYZ_RGBA> arrPoint);
+
     public: void Draw();
     public: void MoveByOffset(float xOffset, float yOffset);
+    public: int ItemsCount() {return m_arrPositionColor.size();}
+    public: XYZ_RGBA& GetItem(int i) {return m_arrPositionColor[i];}
 
     // points
-    protected: int m_DrawMode = 0;
-    protected: std::vector<XYZ> m_arrPosition;
-    protected: std::vector<RGBA> m_arrColor;
+    protected: int m_DrawMode;
+    protected: std::vector<XYZ_RGBA> m_arrPositionColor;
 };
 
-class My2DObject
+class MyObject
 {
-    public: void Add2DPrimitive(My2DPrimitive primitive);
-    public: void RemoveAll();
+    public: MyObject();
+    public: MyObject(std::vector<MyPolygon> arrPolygon);
+
     public: void Draw();
     public: void MoveByOffset(float xOffset, float yOffset);
+    public: void CreateByTemplate(const MyObject& objTemplate, XY realPos, float realWidth, float realHeight);
 
-    protected: std::vector<My2DPrimitive> m_arr2DPrimitive;
-    protected: XY m_posCenter;
+    protected: std::vector<MyPolygon> m_arrPolygon;
 };

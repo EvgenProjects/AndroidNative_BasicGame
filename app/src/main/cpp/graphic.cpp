@@ -4,14 +4,14 @@
 #include <GLES2/gl2.h>
 #include "graphic.h"
 
-Graphic::Graphic()
+MyGraphic::MyGraphic()
 {
 	m_Width = 0;
 	m_Height = 0;
 	m_isGraphicInited = false;
 }
 
-void Graphic::DrawBackground(float red, float green, float blue, float alpha)
+void MyGraphic::DrawBackground(float red, float green, float blue, float alpha)
 {
 	if (m_Display == EGL_NO_DISPLAY || m_Surface == EGL_NO_SURFACE || m_Context == EGL_NO_CONTEXT)
 		return;
@@ -20,7 +20,7 @@ void Graphic::DrawBackground(float red, float green, float blue, float alpha)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Graphic::DrawGraphicEnd()
+void MyGraphic::DrawGraphicEnd()
 {
 	if (m_Display == EGL_NO_DISPLAY || m_Surface == EGL_NO_SURFACE || m_Context == EGL_NO_CONTEXT)
 		return;
@@ -28,7 +28,7 @@ void Graphic::DrawGraphicEnd()
 	eglSwapBuffers(m_Display, m_Surface);
 }
 
-void Graphic::CreateSurfaceFromWindow(ANativeWindow* pWindow)
+void MyGraphic::CreateSurfaceFromWindow(ANativeWindow* pWindow)
 {
 	const EGLint attribs[] = {EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
 							  EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
@@ -46,7 +46,7 @@ void Graphic::CreateSurfaceFromWindow(ANativeWindow* pWindow)
 	m_Surface = eglCreateWindowSurface(m_Display, m_configOpenGL, pWindow, NULL);
 }
 
-void Graphic::InitGraphic(ANativeWindow* pWindow)
+void MyGraphic::InitGraphic(ANativeWindow* pWindow)
 {
 	if (m_isGraphicInited)
 	{
@@ -92,7 +92,7 @@ void Graphic::InitGraphic(ANativeWindow* pWindow)
 	m_isGraphicInited = true;
 }
 
-void Graphic::CloseGraphic()
+void MyGraphic::CloseGraphic()
 {
 	if (m_Display != EGL_NO_DISPLAY)
 	{
@@ -114,71 +114,117 @@ void Graphic::CloseGraphic()
 	m_Surface = EGL_NO_SURFACE;
 }
 
-// my 2D primitive
-void My2DPrimitive::SetMode(int drawMode)
+// my polygon
+MyPolygon::MyPolygon()
+{
+	m_DrawMode = 0;
+}
+MyPolygon::MyPolygon(int drawMode, std::vector<XYZ_RGBA> arrPoint)
 {
 	m_DrawMode = drawMode;
+	for (int i=0; i<arrPoint.size(); i++)
+		m_arrPositionColor.push_back(arrPoint[i]);
 }
 
-void My2DPrimitive::Add(float x, float y, RGBA color)
+void MyPolygon::Draw()
 {
-	// convert from 0..1 to -1 ... 1
-	m_arrPosition.push_back(XYZ{.x=(x*2.f-1.f), .y=2.f*(1.f-y)-1.f, .z=0});
-	m_arrColor.push_back(color);
-}
-
-void My2DPrimitive::RemoveAll()
-{
-	m_arrPosition.clear();
-	m_arrColor.clear();
-}
-
-void My2DPrimitive::Draw()
-{
-	int countOfPointsToDraw = m_arrPosition.size();
+	int countOfPointsToDraw = m_arrPositionColor.size();
 
 	// point (x,y,z)
 	glVertexPointer(3, // it is count of fields: x,y,z
 					GL_FLOAT,
-					sizeof(XYZ),
-					(GLvoid*)m_arrPosition.data()
+					sizeof(XYZ_RGBA),
+					(GLvoid*)m_arrPositionColor.data()
 	);
 
 	// color (r,g,b,alpha)
 	glColorPointer(4, // it is count of fields: red,green,blue, alpha
 				   GL_FLOAT,
-				   sizeof(RGBA),
-				   (GLvoid*) ((char*)m_arrColor.data())
+				   sizeof(XYZ_RGBA),
+				   (GLvoid*) ((char*)m_arrPositionColor.data()+sizeof(XYZ))
 	);
 
 	glDrawArrays(m_DrawMode, 0 /*first index to draw*/, countOfPointsToDraw);
 }
 
-void My2DPrimitive::MoveByOffset(float xOffset, float yOffset)
+void MyPolygon::MoveByOffset(float xOffset, float yOffset)
 {
-	for (int i=0; i<m_arrPosition.size(); i++) {
-		m_arrPosition[i].x += xOffset;
-		m_arrPosition[i].y += yOffset;
+	for (int i=0; i<m_arrPositionColor.size(); i++) {
+		m_arrPositionColor[i].position.x += xOffset;
+		m_arrPositionColor[i].position.y += yOffset;
 	}
 }
 
 /////////
-void My2DObject::Add2DPrimitive(My2DPrimitive primitive)
+MyObject::MyObject()
 {
-	m_arr2DPrimitive.push_back(primitive);
+
 }
-void My2DObject::RemoveAll()
+MyObject::MyObject(std::vector<MyPolygon> arrPolygon)
 {
-	m_arr2DPrimitive.clear();
-}
-void My2DObject::Draw()
-{
-	for (int i=0; i<m_arr2DPrimitive.size(); i++)
-		m_arr2DPrimitive[i].Draw();
+	for (int i=0; i<arrPolygon.size(); i++)
+		m_arrPolygon.push_back(arrPolygon[i]);
 }
 
-void My2DObject::MoveByOffset(float xOffset, float yOffset)
+void MyObject::Draw()
 {
-	for (int i=0; i<m_arr2DPrimitive.size(); i++)
-		m_arr2DPrimitive[i].MoveByOffset(xOffset, yOffset);
+	for (int i=0; i<m_arrPolygon.size(); i++)
+		m_arrPolygon[i].Draw();
+}
+
+void MyObject::MoveByOffset(float xOffset, float yOffset)
+{
+	for (int i=0; i<m_arrPolygon.size(); i++)
+		m_arrPolygon[i].MoveByOffset(xOffset, yOffset);
+}
+
+void MyObject::CreateByTemplate(const MyObject& objTemplate, XY realPos, float realWidth, float realHeight)
+{
+	m_arrPolygon.clear();
+
+	float minX = 0, maxX = 0;
+	float minY = 0, maxY = 0;
+	for (int iPolygon=0; iPolygon<objTemplate.m_arrPolygon.size(); iPolygon++)
+	{
+		MyPolygon myPolygon = objTemplate.m_arrPolygon[iPolygon];
+		for (int i=0; i<myPolygon.ItemsCount(); i++)
+		{
+			XYZ_RGBA& rItem = myPolygon.GetItem(i);
+			if (rItem.position.x<minX)
+				minX = rItem.position.x;
+			if (rItem.position.x>maxX)
+				maxX = rItem.position.x;
+			if (rItem.position.x<minY)
+				minY = rItem.position.y;
+			if (rItem.position.x>maxY)
+				maxY = rItem.position.y;
+		}
+		m_arrPolygon.push_back(myPolygon);
+	}
+	float imgWidth = maxX-minX;
+	if (imgWidth<=0)
+		return;
+
+	float imgHeight = maxY-minY;
+	if (imgHeight<=0)
+		return;
+
+	for (int iPolygon=0; iPolygon<objTemplate.m_arrPolygon.size(); iPolygon++)
+	{
+		MyPolygon myPolygon = objTemplate.m_arrPolygon[iPolygon];
+
+		// convert each point
+		for (int i=0; i<myPolygon.ItemsCount(); i++)
+		{
+			XYZ_RGBA& rItem = myPolygon.GetItem(i);
+			XY pt = XY (
+					realPos.x + realWidth * rItem.position.x / imgWidth,
+					realPos.y + realHeight * rItem.position.y / imgHeight);
+
+			// convert from 0..1 to -1 ... 1
+			rItem.position.x = pt.x*2.f-1.f;
+			rItem.position.y = 2.f*(1.f-pt.y)-1.f;
+		}
+		m_arrPolygon.push_back(myPolygon);
+	}
 }

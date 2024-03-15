@@ -10,18 +10,14 @@ class MyGame
 
     // fields
     protected: AAssetManager* m_pAssetManager;
-    protected: Graphic m_Graphic;
+    protected: MyGraphic m_Graphic;
     protected: bool m_isButtonPressed;
     protected: XY m_ptWhenTouched;
     protected: float m_moveStep;
 
     // my game
-    public: void CreateMyAirPlane(float xCenter, float yCenter);
-    public: void CreateEnemyAirPlane(float xCenter, float yCenter);
-    public: void CreateLake(float xCenter, float yCenter, float width, float height);
-    protected: My2DObject m_AirPlane;
-    protected: My2DObject m_Lakes;
-    protected: My2DObject m_EnemyAirPlane;
+    protected: MyObject m_MyAirPlane;
+    protected: MyObject m_Lake1;
 
     // events
     public: void OnActiveFocus();

@@ -17,6 +17,7 @@ class MyGame
 
     // my game
     protected: MyObject m_MyAirPlane;
+    protected: MyObject m_EnemyAirPlane;
     protected: MyObject m_Lake1;
     protected: XY m_2DcameraPosition;
     protected: float m_2DcameraAngle;

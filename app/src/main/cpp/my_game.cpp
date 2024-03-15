@@ -65,6 +65,7 @@ void MyGame::OnDraw()
     glRotatef(m_2DcameraAngle, 0, 0, 1);
     glTranslatef(m_2DcameraPosition.x, m_2DcameraPosition.y, 0);
     m_Lake1.Draw();
+    m_EnemyAirPlane.Draw();
 
     m_Graphic.DrawGraphicEnd();
 }
@@ -84,4 +85,5 @@ void MyGame::OnCreateWindow(ANativeWindow *pWindow)
 
     m_MyAirPlane.CreateByTemplate(g_MyAirPlane, XY(0.5, 0.8), 0.2, 0.1);
     m_Lake1.CreateByTemplate(g_Lake, XY(0.4, -1.3), 0.5, 0.7);
+    m_EnemyAirPlane.CreateByTemplate(g_EnemyAirPlane, XY(0.2, -0.8), 0.2, 0.1);
 }

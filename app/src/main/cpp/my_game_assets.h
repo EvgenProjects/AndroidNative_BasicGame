@@ -5,6 +5,8 @@
 #define colorWhite          RGBA{0.9f, 0.9f, 0.9f, 1.0f}
 #define colorVeryLightBlue  RGBA{0.3f, 0.4f, 0.8f, 0.7f}
 
+#define colorBrown  RGBA{0.44f, 0.4f, 0.34f, 0.7f}
+
 MyObject g_MyAirPlane = MyObject({
 
      MyPolygon(GL_TRIANGLE_FAN, { // cabin (points from Adobe Illustrator)
@@ -70,4 +72,38 @@ MyObject g_Lake = MyObject({
         {XY(14,10),  colorBlue},
         {XY(43,0),   colorBlue}, // first point
     }),
+});
+
+MyObject g_EnemyAirPlane = MyObject({
+
+     MyPolygon(GL_TRIANGLE_FAN, { // cabin (points from Adobe Illustrator)
+             {XY(50, 50), colorBrown}, // center point
+             {XY(46, 5),  colorBrown}, // first point
+             {XY(49, 3),  colorBrown},
+             {XY(51, 3),  colorBrown},
+             {XY(53, 5),  colorBrown},
+             {XY(54, 15), colorBrown},
+             {XY(55, 24), colorBrown},
+             {XY(55, 44), colorBrown},
+             {XY(56, 52), colorBrown},
+             {XY(56, 69), colorBrown},
+             {XY(58, 71), colorBrown},
+             {XY(58, 79), colorBrown},
+             {XY(59, 80), colorBrown},
+             {XY(59, 85), colorBrown},
+             {XY(57, 87), colorBrown},
+             {XY(56, 89), colorBrown},
+             {XY(42, 89), colorBrown},
+             {XY(42, 87), colorBrown},
+             {XY(40, 85), colorBrown},
+             {XY(40, 80), colorBrown},
+             {XY(41, 79), colorBrown},
+             {XY(41, 70), colorBrown},
+             {XY(42, 69), colorBrown},
+             {XY(43, 51), colorBrown},
+             {XY(44, 44), colorBrown},
+             {XY(45, 25), colorBrown},
+             {XY(45.5,16),colorBrown},
+             {XY(46, 5),  colorBrown}, // first point
+     }),
 });

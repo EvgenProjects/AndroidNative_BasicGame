@@ -8,10 +8,8 @@ MyGame::MyGame(AAssetManager* pAssetManager)
 {
 	m_pAssetManager = pAssetManager;
     m_isButtonPressed = false;
-    m_moveStep = 0;
     m_2DcameraPosition.x = 0;
     m_2DcameraPosition.y = 0;
-    m_2DcameraAngle = 0;
 }
 
 void MyGame::OnActiveFocus()
@@ -40,13 +38,17 @@ bool MyGame::OnHandleTouch(AInputEvent* pEvent, bool isMotion, bool isTouchDown,
 
 void MyGame::OnNextTick()
 {
-    m_2DcameraPosition.y += m_moveStep;
+    m_2DcameraPosition.y -= 0.008;
+
+    for (int i=0; i<m_arrEnemyAirPlane.size(); i++)
+        m_arrEnemyAirPlane[i].MoveByOffset(0, -0.004);
+
     if (m_isButtonPressed)
     {
         if (m_ptInDevicePixelWhenTouched.x < m_Graphic.GetWidth()/2.0f)
-            m_MyAirPlane.MoveByOffset(m_moveStep, 0);
+            m_MyAirPlane.MoveByOffset(-0.008, 0);
         else
-            m_MyAirPlane.MoveByOffset(-m_moveStep, 0);
+            m_MyAirPlane.MoveByOffset(0.008, 0);
     }
 }
 
@@ -56,16 +58,18 @@ void MyGame::OnDraw()
 
     // no move
     glLoadIdentity();
-    glRotatef(m_2DcameraAngle, 0, 0, 1);
     glTranslatef(0, 0, 0);
     m_MyAirPlane.Draw();
 
     // move camera
     glLoadIdentity();
-    glRotatef(m_2DcameraAngle, 0, 0, 1);
     glTranslatef(m_2DcameraPosition.x, m_2DcameraPosition.y, 0);
-    m_Lake1.Draw();
-    m_EnemyAirPlane.Draw();
+
+    for (int i=0; i<m_arrEnemyAirPlane.size(); i++)
+        m_arrEnemyAirPlane[i].Draw();
+
+    for (int i=0; i<m_arrBackgroundObject.size(); i++)
+        m_arrBackgroundObject[i].Draw();
 
     m_Graphic.DrawGraphicEnd();
 }
@@ -79,11 +83,15 @@ void MyGame::OnCreateWindow(ANativeWindow *pWindow)
 {
     m_Graphic.InitGraphic(pWindow);
 
-    m_moveStep = -0.008;
     m_2DcameraPosition.x = 0;
     m_2DcameraPosition.y = 0;
 
-    m_MyAirPlane.CreateByTemplate(g_MyAirPlane, XY(0.5, 0.8), 0.2, 0.1);
-    m_Lake1.CreateByTemplate(g_Lake, XY(0.4, -1.3), 0.5, 0.7);
-    m_EnemyAirPlane.CreateByTemplate(g_EnemyAirPlane, XY(0.2, -0.8), 0.2, 0.1);
+    m_MyAirPlane = TEMPLATE_MyAirPlane.CreateByTemplate(XY(0.5, 0.8), 0.2, 0.1);
+    m_arrEnemyAirPlane.push_back(TEMPLATE_EnemyAirPlane.CreateByTemplate(XY(0.1, -1.4), 0.2, 0.1));
+    m_arrEnemyAirPlane.push_back(TEMPLATE_EnemyAirPlane.CreateByTemplate(XY(0.15, -1.8), 0.2, 0.1));
+
+    m_arrBackgroundObject.push_back(TEMPLATE_Lake.CreateByTemplate(XY(0.4, -1.3), 0.5, 0.5));
+    m_arrBackgroundObject.push_back(TEMPLATE_Tree.CreateByTemplate(XY(0.88, -0.9), 0.08, 0.06));
+    m_arrBackgroundObject.push_back(TEMPLATE_Tree.CreateByTemplate(XY(0.9, -1.2), 0.08, 0.06));
+    m_arrBackgroundObject.push_back(TEMPLATE_Tree.CreateByTemplate(XY(0.3, -1.3), 0.08, 0.06));
 }

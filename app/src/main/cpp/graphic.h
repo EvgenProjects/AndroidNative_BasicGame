@@ -66,6 +66,7 @@ class MyPolygon
 {
     public: MyPolygon();
     public: MyPolygon(int drawMode, std::vector<XYZ_RGBA> arrPoint);
+    MyPolygon(int drawMode, const char* textColorRGB, XY centerPoint, const char* textPoints);
 
     public: void Draw();
     public: void MoveByOffset(float xOffset, float yOffset);
@@ -84,7 +85,8 @@ class MyObject
 
     public: void Draw();
     public: void MoveByOffset(float xOffset, float yOffset);
-    public: void CreateByTemplate(const MyObject& objTemplate, XY realPos, float realWidth, float realHeight);
+    public: MyObject CreateByTemplate(XY realPos, float realWidth, float realHeight);
+    public: void AddPolygon(MyPolygon myPolygon);
 
     protected: std::vector<MyPolygon> m_arrPolygon;
 };

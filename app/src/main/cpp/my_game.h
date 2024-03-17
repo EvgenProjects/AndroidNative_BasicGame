@@ -17,10 +17,10 @@ class MyGame
 
     // my game
     protected: MyObject m_MyAirPlane;
-    protected: MyObject m_EnemyAirPlane;
-    protected: MyObject m_Lake1;
+    protected: std::vector<MyObject> m_arrEnemyAirPlane;
+    protected: std::vector<MyObject> m_arrBackgroundObject;
     protected: XY m_2DcameraPosition;
-    protected: float m_2DcameraAngle;
+
     // events
     public: void OnActiveFocus();
     public: void OnLostFocus();

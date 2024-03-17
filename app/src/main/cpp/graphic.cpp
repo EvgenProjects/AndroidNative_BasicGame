@@ -2,6 +2,9 @@
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
+#include <string>
+#include <sstream>
+#include <iostream>
 #include "graphic.h"
 
 MyGraphic::MyGraphic()
@@ -119,11 +122,52 @@ MyPolygon::MyPolygon()
 {
 	m_DrawMode = 0;
 }
+
 MyPolygon::MyPolygon(int drawMode, std::vector<XYZ_RGBA> arrPoint)
 {
 	m_DrawMode = drawMode;
 	for (int i=0; i<arrPoint.size(); i++)
 		m_arrPositionColor.push_back(arrPoint[i]);
+}
+
+MyPolygon::MyPolygon(int drawMode, const char* textColorRGB, XY centerPoint, const char* textPoints)
+{
+	m_DrawMode = drawMode;
+
+	// convert textColorRGB = "#BE1E2D" -> r(0..1), g(0..1), b(0..1)
+	RGBA color;
+	std::string stringColorRGB = textColorRGB;
+	int hexMode = 16;
+	color.red = strtol(stringColorRGB.substr(1, 2).c_str(), NULL, hexMode);
+	color.red /= 255.0f;
+
+	color.green = strtol(stringColorRGB.substr(3, 2).c_str(), NULL, hexMode);
+	color.green /= 255.0f;
+
+	color.blue = strtol(stringColorRGB.substr(5, 2).c_str(), NULL, hexMode);
+	color.blue /= 255.0f;
+
+	color.alpha = 1; // no alpha
+
+	// split string by space
+	std::string stringPoints = textPoints;
+	std::istringstream f(stringPoints);
+	std::string textPoint;
+	while (std::getline(f, textPoint, ' '))
+	{
+		int pos = std::string(textPoint).find(',');
+		XY position;
+		position.x = atof(textPoint.substr(0, pos).c_str());
+		position.y = atof(textPoint.substr(pos+1).c_str());
+
+		m_arrPositionColor.push_back(XYZ_RGBA(position, color));
+	}
+
+	// add first point to end
+	m_arrPositionColor.push_back(m_arrPositionColor[0]);
+
+	// add center point at begin
+	m_arrPositionColor.insert(m_arrPositionColor.begin(), XYZ_RGBA(centerPoint, color));
 }
 
 void MyPolygon::Draw()
@@ -157,13 +201,17 @@ void MyPolygon::MoveByOffset(float xOffset, float yOffset)
 
 /////////
 MyObject::MyObject()
-{
+{}
 
-}
 MyObject::MyObject(std::vector<MyPolygon> arrPolygon)
 {
 	for (int i=0; i<arrPolygon.size(); i++)
 		m_arrPolygon.push_back(arrPolygon[i]);
+}
+
+void MyObject::AddPolygon(MyPolygon myPolygon)
+{
+	m_arrPolygon.push_back(myPolygon);
 }
 
 void MyObject::Draw()
@@ -178,15 +226,15 @@ void MyObject::MoveByOffset(float xOffset, float yOffset)
 		m_arrPolygon[i].MoveByOffset(xOffset, yOffset);
 }
 
-void MyObject::CreateByTemplate(const MyObject& objTemplate, XY realPos, float realWidth, float realHeight)
+MyObject MyObject::CreateByTemplate(XY realPos, float realWidth, float realHeight)
 {
-	m_arrPolygon.clear();
+	MyObject resultObject;
 
 	float minX = 0, maxX = 0;
 	float minY = 0, maxY = 0;
-	for (int iPolygon=0; iPolygon<objTemplate.m_arrPolygon.size(); iPolygon++)
+	for (int iPolygon=0; iPolygon<m_arrPolygon.size(); iPolygon++)
 	{
-		MyPolygon myPolygon = objTemplate.m_arrPolygon[iPolygon];
+		MyPolygon myPolygon = m_arrPolygon[iPolygon];
 		for (int i=0; i<myPolygon.ItemsCount(); i++)
 		{
 			XYZ_RGBA& rItem = myPolygon.GetItem(i);
@@ -202,15 +250,15 @@ void MyObject::CreateByTemplate(const MyObject& objTemplate, XY realPos, float r
 	}
 	float imgWidth = maxX-minX;
 	if (imgWidth<=0)
-		return;
+		return resultObject;
 
 	float imgHeight = maxY-minY;
 	if (imgHeight<=0)
-		return;
+		return resultObject;
 
-	for (int iPolygon=0; iPolygon<objTemplate.m_arrPolygon.size(); iPolygon++)
+	for (int iPolygon=0; iPolygon<m_arrPolygon.size(); iPolygon++)
 	{
-		MyPolygon myPolygon = objTemplate.m_arrPolygon[iPolygon];
+		MyPolygon myPolygon = m_arrPolygon[iPolygon];
 
 		// convert each point
 		for (int i=0; i<myPolygon.ItemsCount(); i++)
@@ -224,6 +272,7 @@ void MyObject::CreateByTemplate(const MyObject& objTemplate, XY realPos, float r
 			rItem.position.x = pt.x*2.f-1.f;
 			rItem.position.y = 2.f*(1.f-pt.y)-1.f;
 		}
-		m_arrPolygon.push_back(myPolygon);
+		resultObject.AddPolygon(myPolygon);
 	}
+	return resultObject;
 }

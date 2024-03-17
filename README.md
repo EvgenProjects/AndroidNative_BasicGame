@@ -1,4 +1,4 @@
-**Flying airplane** ![image](https://github.com/EvgenProjects/AndroidNative_BasicGame/assets/38002631/118ae6b0-f710-4c7c-8dc1-68d329f74245)
+**`Flying airplane`** ![image](https://github.com/EvgenProjects/AndroidNative_BasicGame/assets/38002631/118ae6b0-f710-4c7c-8dc1-68d329f74245)
 
 **Rule:**
 You can move airplane by touching screen. Also you will see enemy airplanes, trees, lake. Be careful :smiley: while flying...

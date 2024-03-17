@@ -25,7 +25,8 @@ You will see result:
 
 I added graphic.cpp file for drawing figures with color
 
-And created game with airplane, lakes, enemy airplanes:
-![image](https://github.com/EvgenProjects/AndroidNative_BasicGame/assets/38002631/652f2215-7abf-4651-9eb1-e3c81112fcc9)
+And created game with airplane, trees, lake, enemy airplanes:
+![image](https://github.com/EvgenProjects/AndroidNative_BasicGame/assets/38002631/a61833b4-6741-462c-9ff7-26c8d9dee845)
+
 
 

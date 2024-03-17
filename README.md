@@ -36,5 +36,5 @@ Run project in Android Studio or APK file in your phone and you will see result:
   
   
   
-17 March 2024: I added graphic.cpp file for drawing polygons using OpenGL. Added my airplane, enemy airplanes, trees, lake:
+17 March 2024: I added graphic.cpp file for drawing polygons using OpenGL. Added my_game_assets.h file with vector points and colors for my airplane, enemy airplanes, lake, trees:
 ![image](https://github.com/EvgenProjects/AndroidNative_BasicGame/assets/38002631/a61833b4-6741-462c-9ff7-26c8d9dee845)

@@ -38,10 +38,10 @@ bool MyGame::OnHandleTouch(AInputEvent* pEvent, bool isMotion, bool isTouchDown,
 
 void MyGame::OnNextTick()
 {
-    m_2DcameraPosition.y -= 0.008;
+    m_2DcameraPosition.y -= 0.0025;
 
     for (int i=0; i<m_arrEnemyAirPlane.size(); i++)
-        m_arrEnemyAirPlane[i].MoveByOffset(0, -0.004);
+        m_arrEnemyAirPlane[i].MoveByOffset(0, -0.002);
 
     if (m_isButtonPressed)
     {
@@ -86,12 +86,16 @@ void MyGame::OnCreateWindow(ANativeWindow *pWindow)
     m_2DcameraPosition.x = 0;
     m_2DcameraPosition.y = 0;
 
-    m_MyAirPlane = TEMPLATE_MyAirPlane.CreateByTemplate(XY(0.5, 0.8), 0.2, 0.1);
-    m_arrEnemyAirPlane.push_back(TEMPLATE_EnemyAirPlane.CreateByTemplate(XY(0.1, -1.4), 0.2, 0.1));
-    m_arrEnemyAirPlane.push_back(TEMPLATE_EnemyAirPlane.CreateByTemplate(XY(0.15, -1.8), 0.2, 0.1));
+	m_MyAirPlane = TEMPLATE_MyAirPlane.CreateByTemplate(XY(0.5, 0.8), 0.15, 0.07);
 
-    m_arrBackgroundObject.push_back(TEMPLATE_Lake.CreateByTemplate(XY(0.4, -1.3), 0.5, 0.5));
-    m_arrBackgroundObject.push_back(TEMPLATE_Tree.CreateByTemplate(XY(0.88, -0.9), 0.08, 0.06));
-    m_arrBackgroundObject.push_back(TEMPLATE_Tree.CreateByTemplate(XY(0.9, -1.2), 0.08, 0.06));
-    m_arrBackgroundObject.push_back(TEMPLATE_Tree.CreateByTemplate(XY(0.3, -1.3), 0.08, 0.06));
+	m_arrEnemyAirPlane.push_back(TEMPLATE_EnemyAirPlane.CreateByTemplate(XY(0.1, -0.1), 0.15, 0.07));
+	m_arrEnemyAirPlane.push_back(TEMPLATE_EnemyAirPlane.CreateByTemplate(XY(0.15, -1.8), 0.15, 0.07));
+	m_arrEnemyAirPlane.push_back(TEMPLATE_EnemyAirPlane.CreateByTemplate(XY(0.8, -2.0), 0.15, 0.07));
+
+	m_arrBackgroundObject.push_back(TEMPLATE_Tree.CreateByTemplate(XY(0.4, -0.3), 0.08, 0.06));
+	m_arrBackgroundObject.push_back(TEMPLATE_Lake.CreateByTemplate(XY(0.6, -0.92), 0.5, 0.5));
+	m_arrBackgroundObject.push_back(TEMPLATE_Tree.CreateByTemplate(XY(0.92, -0.8), 0.08, 0.06));
+	m_arrBackgroundObject.push_back(TEMPLATE_Tree.CreateByTemplate(XY(0.9, -1.0), 0.08, 0.06));
+	m_arrBackgroundObject.push_back(TEMPLATE_Tree.CreateByTemplate(XY(0.3, -1.1), 0.08, 0.06));
+	m_arrBackgroundObject.push_back(TEMPLATE_Lake.CreateByTemplate(XY(0.5, -2.7), 0.8, 0.7));
 }

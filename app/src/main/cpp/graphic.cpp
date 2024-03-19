@@ -265,8 +265,8 @@ MyObject MyObject::CreateByTemplate(XY realPos, float realWidth, float realHeigh
 		{
 			XYZ_RGBA& rItem = myPolygon.GetItem(i);
 			XY pt = XY (
-					realPos.x + realWidth * rItem.position.x / imgWidth,
-					realPos.y + realHeight * rItem.position.y / imgHeight);
+					realPos.x + realWidth * rItem.position.x / imgWidth - realWidth/2.0f,
+					realPos.y + realHeight * rItem.position.y / imgHeight - realHeight/2.0f);
 
 			// convert from 0..1 to -1 ... 1
 			rItem.position.x = pt.x*2.f-1.f;
